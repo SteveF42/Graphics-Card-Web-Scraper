@@ -2,8 +2,7 @@ import requests
 import json
 import pprint
 from bs4 import BeautifulSoup
-from SendEmail import format_message
-from SendEmail import email
+from GmailAPI.SendEmail import format_message, email
 from GmailAPI import Service
 import time
 from lxml.html import fromstring
