@@ -42,61 +42,22 @@ def format_message(products):
     msg = '''
     <div>
         <ul> 
-            <li>Vender: {}</li>
-            <li>Card Model: {}</li>
-            <li>Availability: {}</li>
-            <li>Price: {}</li>
-            <li>Purchase Link: {}</li>
+            <li>Vender: <strong>{}</strong> </li>
+            <li>Card Model: <strong>{}</strong> </li>
+            <li>Availability: <strong>{}</strong> </li>
+            <li>Price: <strong>{}</strong> </li>
+            <li>Purchase Link: {} </li>
         </ul>
         -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     </div>
     '''.format(vender,card_model,availability, price,link)
     return msg
 
-def create_message_with_attachment(sender, to, subject, message_text, file):
-  message = MIMEMultipart()
-  message['to'] = to
-  message['from'] = sender
-  message['subject'] = subject
-
-  msg = MIMEText(message_text)
-  message.attach(msg)
-
-  content_type, encoding = mimetypes.guess_type(file)
-
-  if content_type is None or encoding is not None:
-    content_type = 'application/octet-stream'
-
-  main_type, sub_type = content_type.split('/', 1)
-
-  if main_type == 'text':
-    fp = open(file, 'rb')
-    msg = MIMEText(fp.read().decode("utf-8"), _subtype=sub_type)
-    fp.close()
-  elif main_type == 'image':
-    fp = open(file, 'rb')
-    msg = MIMEImage(fp.read(), _subtype=sub_type)
-    fp.close()
-  elif main_type == 'audio':
-    fp = open(file, 'rb')
-    msg = MIMEAudio(fp.read(), _subtype=sub_type)
-    fp.close()
-  else:
-    fp = open(file, 'rb')
-    msg = MIMEBase(main_type, sub_type)
-    msg.set_payload(fp.read())
-    fp.close()
-  filename = os.path.basename(file)
-  msg.add_header('Content-Disposition', 'attachment', filename=filename)
-  message.attach(msg)
-
-  raw_message = base64.urlsafe_b64encode(message.as_string().encode("utf-8"))
-  return {'raw': raw_message.decode("utf-8")}
 
 
 def email(service,message):
     for name in EMAILS:
-        msg = create_message('stevewflores43@gmail.com', name, 'RTX 2080 AVAILABILITY/PRICES',message)
+        msg = create_message('me', name, 'RTX 2080 AVAILABILITY/PRICES',message)
         send_msg = send_message(service, 'me', msg)
         print("messages sent: %s" % send_msg)
 
