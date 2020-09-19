@@ -57,8 +57,8 @@ def format_message(products):
 
 def email(service,message):
     for name in EMAILS:
-        msg = create_message('me', name, 'RTX 2080 AVAILABILITY/PRICES',message)
-        send_msg = send_message(service, 'me', msg)
+        raw_msg = create_message('me', name, 'RTX 2080 AVAILABILITY/PRICES',message)
+        send_msg = send_message(service, 'me', raw_msg)
         print("messages sent: %s" % send_msg)
 
 
