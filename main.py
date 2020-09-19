@@ -7,6 +7,7 @@ from GmailAPI import Service
 import time
 from lxml.html import fromstring
 from itertools import cycle
+from random import choice
 import traceback
 
 PROXIES = {'https': '162.144.92.212:3838'}
@@ -18,37 +19,27 @@ MINUTE = 60  # sec
 HOUR = 60 * 60  # min * sec
 DAY = 24 * 60 * 60  # hours * min * sec
 
-
+#code from https://zenscrape.com/how-to-build-a-simple-proxy-rotator-in-python/
 def get_proxies():
-    url = 'https://free-proxy-list.net/'
-    response = requests.get(url)
-    parser = fromstring(response.text)
-    proxies = set()
-    for i in parser.xpath('//tbody/tr')[:10]:
-        if i.xpath('.//td[7][contains(text(),"yes")]'):
-            # Grabbing IP and corresponding PORT
-            proxy = ":".join([i.xpath('.//td[1]/text()')[0],
-                             i.xpath('.//td[2]/text()')[0]])
-            proxies.add(proxy)
-    return proxies
+    response = requests.get("https://sslproxies.org/")
+    soup = BeautifulSoup(response.content, 'lxml')
+    proxy = {'https': choice(list(map(lambda x:x[0]+':'+x[1], list(zip(map(lambda x:x.text, soup.findAll('td')[::8]), map(lambda x:x.text, soup.findAll('td')[1::8]))))))}
+    return proxy
 
 
 def get_request_result(url):
-    proxies = get_proxies()
-    proxy_pool = cycle(proxies)
-
-    for i in range(1,len(proxies)+1):
-    # Get a proxy from the pool
-        proxy = next(proxy_pool)
-        print("Request #%d"%i)
+    while True:
         try:
-            result = requests.get(url,proxies={"http": proxy, "https": proxy},headers=HEADERS)
-            print(result.json())
+            proxy = get_proxies()
+            print("Proxy currently being used: {}".format(proxy))
+            response = requests.get(url, proxies=proxy, timeout=7,headers=HEADERS)
+            break
+            # if the request is successful, no exception is raised
         except:
-            # Most free proxies will often get connection errors. You will have retry the entire request using another proxy to work. 
-            # We will just skip retries as its beyond the scope of this tutorial and we are only downloading a single url 
-            print("Skipping. Connnection error")
-    return result
+            print("Connection error, looking for another proxy")
+            pass
+    return response
+
 def NewEgg():
     result = get_request_result('https://www.newegg.com/p/pl?d=rtx+3080')
     
@@ -130,7 +121,7 @@ def StartClock():
         passed_time += 1
         day_passed += 1
 
-        if passed_time >= MINUTE * 60:
+        if passed_time >= MINUTE * 45:
             passed_time = 0
             if not emailed_today:
                 products = NewEgg()
